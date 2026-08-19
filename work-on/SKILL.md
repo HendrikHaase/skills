@@ -27,10 +27,22 @@ git symbolic-ref --quiet --short refs/remotes/origin/HEAD
 That prints `origin/<default>`. If it is unset, take the first of `origin/dev`, `origin/develop`, `origin/main`, `origin/master` that exists.
 
 ```bash
-git switch -c feature/<id>-<slug> origin/<default>
+git switch --no-track -c feature/<id>-<slug> origin/<default>
 ```
 
+`--no-track` goes before `-c`. After it, git reads it as the branch name and dies with `fatal: only one reference expected`.
+
+`--no-track` is the whole point of this line. Without it the new branch tracks `origin/dev`, and every later push — bare `git push`, VS Code's Sync — sends the feature work straight to the shared branch. A branch with no upstream cannot do that; the first push has to name where it goes.
+
 Uncommitted changes come along with the switch. Say so rather than stashing anything.
+
+Pair it with this, once per machine, so the first push publishes the feature branch instead of erroring:
+
+```bash
+git config --global push.autoSetupRemote true
+```
+
+Then `git push` on an upstreamless branch creates `origin/<same-name>` and tracks it. If it is not set, the first push is `git push -u origin feature/<id>-<slug>`.
 
 ## 3. Name it
 
