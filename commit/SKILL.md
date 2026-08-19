@@ -42,6 +42,8 @@ A hit means unstage and report, not commit. A secret that reaches the remote has
 
 **Committing on a shared branch.** If `git rev-parse --abbrev-ref HEAD` is `main`, `master`, `dev`, or `develop`, do not commit there. Propose `feature/<slug-from-the-staged-diff>` and commit there once the user confirms. If the user names a work item instead, hand off to `work-on` and commit on the branch it creates. `git switch -c` carries staged changes across, so nothing is lost.
 
+This stop is deliberate on personal and single-author repos too, and the owner has confirmed it. Propose the branch. Do not propose dropping `main` from the list.
+
 **Rewriting published history.** Never `--no-verify`, never force-push, never amend or rebase a commit that already exists on the remote. Check with `git branch -r --contains <sha>` when unsure. Amending a local-only commit is fine.
 
 Build and test failures do not block a commit. Broken work still deserves a checkpoint.

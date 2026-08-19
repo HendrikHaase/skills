@@ -58,12 +58,15 @@ Before applying any Accepted edit, present the synthesizer's full Accepted/Rejec
 
 Backlog items are not skill edits. List them in the summary; only file them to a tracker if the user asks.
 
-Skills live in `~/.claude/skills/<name>/SKILL.md`, the project's `.claude/skills/`, or a plugin directory under `~/.claude/plugins/`. Edit the file that the transcript shows was actually loaded. For each approved Accepted item, follow the Routing field:
+Skills live in `~/.claude/skills/<name>/SKILL.md`, the project's `.claude/skills/`, or a plugin directory under `~/.claude/plugins/`. Edit the file that the transcript shows was actually loaded, and apply the edit at that path. A directory in the working tree can hold a checkout of the same skills repo and still be a different file: same content, same remote, no effect on what loads. Resolve the load path first, then re-read the edited file there before declaring done.
+
+For each approved Accepted item, follow the Routing field:
 
 - Trivial existing-skill edit (a one-line bullet, a tightened sentence, a stale fact corrected): apply it.
 - Substantive existing-skill edit (a new section, a new pattern table, more than ~10 lines): draft it, show the diff, apply after the user confirms.
 - `tune description: <skill path>` (the skill exists but didn't trigger when it should have): rewrite the frontmatter `description` so it names the trigger phrases and situations from this transcript. Description drives model invocation; the body does not.
 - `new skill: <kebab-name>`: create `<name>/SKILL.md` with frontmatter (`name` matching the directory, `description`), a short body, and reference files only if the body would otherwise exceed roughly 100 lines.
+- `update config: <path>`: the learning is that a standing claim is false, not that a skill is thin. Correct the CLAUDE.md line, memory file, or setting that says it. A config that mis-routes work reaches every future session, and no skill edit fixes it.
 
 Every touched SKILL.md must still parse: `---` fence on line 1, `name` matching its directory, non-empty `description`.
 
