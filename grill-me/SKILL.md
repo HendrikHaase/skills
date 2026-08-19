@@ -1,44 +1,26 @@
-\---
-
+---
 name: grill-me
-
 description: Grill the user relentlessly about a plan, decision, or idea. Use when the user wants to stress-test their thinking, or uses any 'grill' trigger phrases.
+---
 
-\---
+Interview the user relentlessly until you reach a shared understanding. Map this as a **design tree**: every decision branches into the decisions that hang off it.
 
+Work the tree in **rounds**. The **frontier** is every decision whose prerequisites are already settled: the questions you can ask _now_ without guessing at answers you haven't heard yet.
 
+Ask with the **AskUserQuestion** tool, one question per call, so the user answers by picking an option. Never put the question in plain prose instead.
 
-Interview the user relentlessly until you reach a shared understanding. Map this as a \*\*design tree\*\*: every decision branches into the decisions that hang off it.
+Build each question like this:
 
+- `header`: the decision in 12 characters or less ("Auth method", "Storage").
+- `question`: the full question, ending in a question mark. Include the tradeoff, not just the choice.
+- `options`: 2 to 4 real, mutually exclusive candidates. Put your recommendation **first** and append `(Recommended)` to its label. Each needs a `description` saying what happens if it is picked. Never write an "Other" option; the tool adds one.
+- `multiSelect: true` when the choices can legitimately combine (which checks to run, which surfaces to cover). Otherwise leave it false.
+- `preview`: use it when the options are concrete artifacts the user should compare by eye (layouts, code shapes, schemas, config). Single-select only.
 
+Work the frontier one question at a time, in dependency order, and let each answer land before the next call. Batch only when several frontier questions are genuinely independent and small; then put up to 4 in a single call. A question whose answer depends on another question still open belongs to a _later_ round, not this one.
 
-Work the tree in \*\*rounds\*\*. The \*\*frontier\*\* is every decision whose prerequisites are already settled: the questions you can ask \_now\_ without guessing at answers you haven't heard yet. Ask the whole frontier in one round: number each question and give your recommended answer. Then wait for the user's answers before the next round.
+Each answer reshapes the tree: settled decisions push the frontier outward and unblock questions that depended on them. Recompute the frontier after every answer. When the user picks "Other" or adds notes, treat that as a new branch and re-derive the frontier from it.
 
-
-
-Each question should be formatted like so:
-
-
-
-```
-
-❓ \*\*Q1\*\* - \*\*<question title>\*\*: <question body, might be multiple paragraphs, including multiple choices>
-
-
-
-➡️ <your recommended answer>
-
-```
-
-
-
-Each round the user answers reshapes the tree: settled decisions push the frontier outward and unblock questions that depended on them. Recompute the frontier and ask the next round. A question whose answer depends on another question still open in this round belongs to a \_later\_ round, not this one.
-
-
-
-Finding \_facts\_ is your job, never the user's. When a frontier question needs a fact from the environment (filesystem, tools, etc.), dispatch a sub-agent to find it; don't ask the user for anything you could look up yourself. Don't block on it: a running exploration is an unsettled prerequisite, so only the questions downstream of it wait for the sub-agent to report; ask the rest of the frontier now. The \_decisions\_ are the user's: put each to them and wait.
-
-
+Finding _facts_ is your job, never the user's. When a frontier question needs a fact from the environment (filesystem, tools, etc.), dispatch an `Explore` agent in the background to find it; don't ask the user for anything you could look up yourself. Don't block on it: a running exploration is an unsettled prerequisite, so only the questions downstream of it wait for the agent to report; ask the rest of the frontier now. The _decisions_ are the user's: put each to them and wait.
 
 The session is done when the frontier is empty: every branch of the design tree visited, nothing left silently assumed. Do not act on it until the user confirms you have reached a shared understanding.
-
