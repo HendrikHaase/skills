@@ -25,6 +25,12 @@ Finding _facts_ is your job, never the user's. When a frontier question needs a 
 
 Facts you feed into a question carry their provenance. Bound every sweep (a per-target `timeout`, or a background agent) and say so when one gets cut short: partial counts presented as a full scan turn a guess into false authority.
 
+Existence claims are asymmetric, and the user answers as though yours are settled. One hit proves a thing exists. Nothing proves it absent — a layered codebase hides the same concept in client enums, model enums, generated VO libs, and seeds, and finding it missing from one layer says only that. So never report an absence as definitive: name the layers you searched ("not in the client enum or the seeds"), and treat a user's "don't we already have X?" as evidence you searched the wrong layer, not as a question already answered.
+
 An answer can assert a fact about the tools or the environment ("gitignored files never get added, so this option is fine"). Test the claim before you design around it. If it is false, say so, show what you ran, and reopen that branch: the premise was part of the answer.
+
+A change to a path that already ships carries two branches the user should not have to remember. How is it turned off — a flag, a config switch, or a structural no-op that makes the feature inert when unused? And what proves the existing path still behaves identically when it is off? Ask both before the frontier counts as empty; they are design decisions, and discovering them after the interview closes reopens work the interview existed to prevent.
+
+A decision that asserts a gate ("spike this before building") or an invariant ("existing behaviour must not change") is not settled until it names the check that fails when it is violated. Prose commitments decay: the gate gets skipped because the build is going well, and the invariant gets broken three edits later by something that looked unrelated. Name the assertion, the blocking checklist entry, or the user's explicit waiver — and note that tests written for the new code do not cover either one.
 
 The session is done when the frontier is empty: every branch of the design tree visited, nothing left silently assumed. Do not act on it until the user confirms you have reached a shared understanding.

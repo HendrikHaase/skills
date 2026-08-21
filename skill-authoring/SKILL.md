@@ -14,7 +14,9 @@ description: <when to use it, in the words that appear in a real request>
 ---
 ```
 
-The description is the whole trigger. A model picks a skill by reading it and nothing else, so it names situations and phrases, not the skill's philosophy. Add `disable-model-invocation: true` only for skills that should run when asked by name and never on the model's own initiative.
+The description is the whole trigger. A model picks a skill by reading it and nothing else, so it names situations and phrases, not the skill's philosophy.
+
+For a skill that should run only when the user asks for it by name, say so **in the description** — "Run ONLY when the user explicitly types the slash command by name; never invoke it on your own initiative" — and repeat it in the global instructions if it matters. Do not reach for `disable-model-invocation: true`: it removes the skill from the harness listing altogether, taking the user's own slash command with it, so the skill becomes invokable by nobody. The symptom is a skill that is present on disk, parses cleanly, and simply does not exist as a command. Diagnose it by listing every skill with the flag against every skill without it; a clean split along that line is the answer.
 
 Broken frontmatter fails silently: the skill still lists, with the raw first line showing where the description belongs. A description that reads like file content means the fence did not parse.
 

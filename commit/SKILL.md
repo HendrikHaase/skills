@@ -30,6 +30,23 @@ Stop and ask when it shows:
 
 Offer three ways out: ignore it, commit it anyway, or leave it out of this commit. Write the `.gitignore` line only if the user picks that. A repo without a `.gitignore` filters nothing, so expect this gate to fire there on every commit until one exists.
 
+### Diff size is not evidence of change
+
+A worktree showing hundreds of modified tracked files usually means the repo stores blobs that predate its own `text=auto` rule, not that hundreds of files were edited. Measure before believing it:
+
+```bash
+git diff --numstat                    # raw
+git diff --ignore-cr-at-eol --numstat # content only; a file that vanishes here is line-ending churn
+```
+
+`--name-only` ignores whitespace flags, so it lists churn either way — use `--numstat` for this. Anything the second command drops is safe to `git checkout --`, and staging it wholesale buries the real work.
+
+Two consequences. Writing a file through a script (`open(p,"w")`, `sed -i`) rewrites every line ending on a CRLF-stored file, so a one-line edit becomes a whole-file diff — restore the committed version and re-apply byte-preserving when that happens. And when a genuine change lands in such a file, `git add --renormalize <file>` it and commit the normalization **alone** first: staged together, the normalization swallows the change and neither is reviewable.
+
+### Whose change is it
+
+In a repo that publishes a package, the version bump and lockfile entry that ship a change are **part of that change** — not the user's unrelated edit, even when the user ran the publish. "Pre-existing modification" is a claim to check against what is being committed, not a default for anything you did not type yourself. Leaving the bump behind records the code without recording which release carries it.
+
 ## 3. Stops that block the commit
 
 **Secrets in the staged diff.** After staging, before committing:

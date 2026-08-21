@@ -1,6 +1,6 @@
 ---
 name: work-on
-description: Use when the user starts a unit of work: "work on #41243", "start work item 41243", "new branch for the rate limiting", "let's do 40581". Creates or resumes the branch that carries the work-item id, so later commits and pull requests inherit it.
+description: Use when the user starts a unit of work, whether or not they name a work item: "work on #41243", "start work item 41243", "new branch for the rate limiting", "let's do 40581", and equally the moment an agreed plan turns into building — "lets get to it", "go ahead", "do it", "start implementing", or any first code edit while sitting on dev/main/master. Creates or resumes the branch that carries the work, before the edits land, so later commits and pull requests inherit it.
 ---
 
 # Work on
