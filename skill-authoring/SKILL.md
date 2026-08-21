@@ -1,6 +1,6 @@
 ---
 name: skill-authoring
-description: Use when writing, importing, porting, or repairing a SKILL.md. Covers the frontmatter contract, importing a skill from another repo or another agent harness, and how skills share state and delegate to each other. Triggers on "write a skill", "add this skill", "port this skill", "the skill isn't firing", or a skill that loads with a wrong description.
+description: Use when writing, importing, porting, publishing, or repairing a SKILL.md — including a skill your own product or service serves for other people's agents to install, and any question about when an installed skill actually becomes available. Covers the frontmatter contract, importing a skill from another repo or another agent harness, verifying a skill you publish, and how skills share state and delegate to each other. Triggers on "write a skill", "add this skill", "port this skill", "install the <thing> skill", "ship a skill for agents", "the skill isn't firing", or a skill that loads with a wrong description.
 ---
 
 # Skill authoring
@@ -36,6 +36,27 @@ A skill written for a different agent harness names tools that do not exist here
 - Model identifiers: foreign slugs become the model names this harness accepts, or get omitted to inherit the session model.
 - Transcript, config, and plugin paths: rewrite to the ones this harness uses, and verify one by listing it.
 - Sibling skills the import references: confirm each one is installed. Strip or re-point the references that are not, rather than leaving a pointer to a skill nobody has.
+
+## Publishing a skill for other people's agents
+
+A skill you serve for strangers to install is a product surface, and the file parsing is the easy
+half. It is unverified until you have run its own install command **verbatim, from an empty
+directory**, and then followed the file's own next step with nothing supplied from your head — no
+token pasted inline, no path you happen to know. That run is where the gaps live: an install line
+that assumes a directory exists, a credential the skill never says how to obtain, an error whose
+message tells the reader nothing about what to do next. An agent given only "install the X skill"
+has your served page and its own shell; if either dead-ends, the skill does not work no matter how
+clean the frontmatter is.
+
+Say where the file goes and where the credential comes from, in the file itself. Give a
+check-only call the reader can make before doing anything destructive, so verifying a credential
+does not require creating something and cleaning it up. And where a credential cannot be
+self-served, say so plainly — an agent told "a human mints this for you" asks; an agent told
+nothing retries.
+
+Do not predict whether a newly installed skill has loaded. The harness's own skill listing
+settles it, availability can change within a session, and a confident guess either way is a claim
+you did not check.
 
 ## Skills that work together
 
