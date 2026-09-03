@@ -25,11 +25,13 @@ For each fact the change's safety depends on, get it as far down this list as is
 
 Any safety fact you can't get to step 4, say so out loud. Don't write it up as settled. Step 4 is usually one small script that imports the same library the app ships and calls the exact function you're worried about.
 
+Running real code over input you invented is step 2, not step 4. When the fact is the shape of data another system hands you — an API response, a DB row, a file another tool writes — a fixture you typed encodes your model of that system, so the test can only confirm the model. Every PASS then promotes a guess to "proven", and the one useful result is a FAIL. Step 4 needs input that crossed the real boundary: a recorded response, a live call, a payload pulled from the running system.
+
 ## Steps
 
 1. Read the change. The diff, the symbols it adds, changes, and deletes, and what it now does differently, including the part the diff doesn't spell out. Pull the history behind it: `git log -p` on the touched files, and the PR body if there is one (`gh pr view`, or `az repos pr show` on Azure DevOps).
 2. Find the one fact it's safe because of. Most changes that look scary are safe because of a single fact, like "this call only drops already-dead cache entries and does nothing else". Find that fact. If it holds, most of the scary cases die at once. Spend your time here, not on a long list of maybes.
-3. Look where grep stops. Read the source of the library you call, and check its pinned version and any local patch. Work out when things run: microtasks, unmount and teardown, Solid versus React. Follow what a symbol search misses: the JSON an API returns, a DB column, a wire format, another language reading the same bytes, a feature flag, code three hops downstream.
+3. Look where grep stops. A comment, warning, or assertion in the code that contradicts your model is a fact to prove by running it, never to argue past — it was usually written by whoever hit the thing you are about to hit. Read the source of the library you call, and check its pinned version and any local patch. Work out when things run: microtasks, unmount and teardown, Solid versus React. Follow what a symbol search misses: the JSON an API returns, a DB column, a wire format, another language reading the same bytes, a feature flag, code three hops downstream.
 4. Be honest about each risk. Give it a real chance of happening and a real cost if it does. Keep the risks you confirmed; list the ones you checked and cleared separately. Cite a real `file:line`, a search that finds nothing is still an answer, and never make up a caller or an API.
 5. Prove the one fact. Write a script or test that runs the real code, run it, and paste what happened. If you can't prove it cheaply, mark it unproven. Don't round up.
 6. For a big or wide change, hand the diff to `interrogate`. Several models review the same change and different models catch different real bugs.
@@ -37,10 +39,10 @@ Any safety fact you can't get to step 4, say so out loud. Don't write it up as s
 ## What to hand back
 
 - **What it does.** What changed, including the part that isn't obvious.
-- **The one fact it's safe because of.** State it, say which step you got it to, and show the proof. If you couldn't prove it, write unproven.
+- **The one fact it's safe because of.** State it, say which step you got it to, and show the proof. If you couldn't prove it, write unproven. A fact that stopped short of step 4 gets repeated in every later status and completion report until it is measured. "Verified, tests pass" three turns after "I can't check this without the running system" is how the caveat dies and the user finds the bug instead.
 - **Risks.** Only the real ones. Each names how it breaks, the `file:line`, how likely and how bad, and how to check. Paste the proof for the ones that matter.
 - **Cleared.** What you checked and why it's fine.
-- **Before you merge.** The cheapest test or repro that catches the real bug, including the script you wrote.
+- **Before you merge.** The cheapest test or repro that catches the real bug, including the script you wrote. If access you lacked earlier turns up mid-task (a credential, a reachable host, a tunnel), it reopens the whole list of facts marked unproven, not only the one currently on fire. Re-measure each or re-state it as still unverified at merge time.
 
 Write it through `unslop`, cite real code, and strip anything private before it goes anywhere public.
 

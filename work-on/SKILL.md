@@ -50,10 +50,11 @@ Then `git push` on an upstreamless branch creates `origin/<same-name>` and track
 
 `41243` titled "Register CS_Master_Meeting_Orga_Setup in masterdata admin" becomes `feature/41243-register-cs-master-meeting-orga-setup`.
 
-Read the title with:
+Read the title through the `azure-devops:work-items` skill, which goes over the REST API with the PAT. Do not reach for `az boards` first: plenty of environments have no `az` at all, and the failure is a bare `command not found` that reads like a broken skill rather than a missing binary.
 
 ```bash
-az boards work-item show --id <id> --query 'fields."System.Title"' -o tsv
+# work-items/wi.sh, or the same call by hand
+curl -s -u ":$PAT" "https://dev.azure.com/<org>/_apis/wit/workitems/<id>?api-version=7.0"
 ```
 
 Resolve the org and credential through the `azure-devops:work-item-connection` skill before that call. If the title cannot be read, branch as `feature/<id>` and carry on.
@@ -64,10 +65,18 @@ Hand the state change and assignment to the `azure-devops:work-items` skill: one
 
 A failure here is worth one line of output, not a stop. The branch is the deliverable.
 
-## 5. Repos with no Azure DevOps remote
+## 5. One branch per repository
+
+The branch belongs to a repository, not to the session. A change that spans repos needs this skill run again in the second one, **before the first edit lands there** — otherwise that repo gets edited on its shared branch by default, and nobody notices until commit time, when the work is already sitting on `dev`.
+
+Same id, same slug convention, so the two branches read as one change and `commit` prefixes both the same way. Check with `git branch --show-current` in the repo you are about to touch, not the one you started in.
+
+## 6. Repos with no Azure DevOps remote
 
 If `git remote get-url origin` does not point at `dev.azure.com` or `visualstudio.com`, skip every step above that talks to ADO. Slug the user's own phrasing instead: "work on rate limiting" becomes `feature/rate-limiting`, branched from the fetched default. No id in the branch means `commit` writes an unprefixed subject, which is correct there.
 
 ## Report
 
 The branch, what it was based on, and either the work-item title and its new state or a note that this repo has no work items.
+
+When the repos are still carrying the last item's branches, `back-to-dev` resets them first.

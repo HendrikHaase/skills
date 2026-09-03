@@ -25,8 +25,11 @@ Stage with `git add -A`. That is what makes the commit complete: files edited by
 Stop and ask when it shows:
 
 - Untracked files nobody mentioned and this session did not create.
-- Secret-shaped names: `.env*`, `*.pat`, `pat.txt`, `*key*`, `*.pem`, `id_rsa*`, `*.pfx`, `credentials*`, `*.publishsettings`.
+- Modified tracked files this session did not touch. They are the user's work in progress, and `-A` sweeps them into your commit without either of you deciding to. Stage explicit paths instead.
+- Secret-shaped names: `.env*`, `*.pat`, `pat.txt`, `*key*`, `*.pem`, `id_rsa*`, `*.pfx`, `credentials*`, `*.publishsettings`, and local config overrides — `*.local.json`, `appsettings*.local.*`, `*.local.yml`, `settings.local.*`. The override pattern matches no obvious secret word, so nothing warns you before it reaches the remote.
 - Binaries or anything over roughly 1 MB.
+
+A credential you find already committed in `HEAD` is a report, not an edit. Say where it is, add the untracked sibling to `.gitignore` so it stops being one `-A` away from the remote, and leave the tracked file alone: rewriting it in your commit neither rotates the credential nor removes it from history, and it buries a security finding inside an unrelated change.
 
 Offer three ways out: ignore it, commit it anyway, or leave it out of this commit. Write the `.gitignore` line only if the user picks that. A repo without a `.gitignore` filters nothing, so expect this gate to fire there on every commit until one exists.
 
@@ -52,8 +55,11 @@ In a repo that publishes a package, the version bump and lockfile entry that shi
 **Secrets in the staged diff.** After staging, before committing:
 
 ```bash
-git diff --cached -U0 | grep -nEi '(password|passwd|secret|token|api[_-]?key|bearer |connectionstring|private[_-]key|BEGIN [A-Z ]*PRIVATE KEY)[^a-z]{0,3}[:=]'
+git diff --cached -U0 | grep -E '^[+-]' | grep -vE '^(\+\+\+|---)' \
+  | grep -nEi '(password|passwd|secret|token|api[_-]?key|bearer |connectionstring|private[_-]key|BEGIN [A-Z ]*PRIVATE KEY)[^a-z]{0,3}[:=]'
 ```
+
+Match added and removed lines only. Git puts the enclosing function or declaration on the `@@` hunk header, so an ordinary identifier like `const TOKEN_MAP: { [token: string]: string }` fires the pattern on code the diff never changed, and a scan that cries wolf is a scan you start skimming.
 
 A hit means unstage and report, not commit. A secret that reaches the remote has to be rotated, and reverting the commit does not rotate it.
 

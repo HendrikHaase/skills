@@ -1,6 +1,6 @@
 ---
 name: unslop
-description: Cut AI tells from any writing. Must always apply.
+description: Cut AI tells from prose before a human reads it. Use when writing or revising anything presented to the user or a reader - a plan, report, review, final verdict, PR or commit body, doc, README, published page, artifact - and on "unslop", "remove AI tells", "make this sound human". The CLAUDE.md prose checklist is the short form; load this for the full pass.
 ---
 
 # Unslop
