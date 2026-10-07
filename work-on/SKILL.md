@@ -1,6 +1,6 @@
 ---
 name: work-on
-description: Use when the user starts a unit of work, whether or not they name a work item: "work on #41243", "start work item 41243", "new branch for the rate limiting", "let's do 40581", and equally the moment an agreed plan turns into building — "lets get to it", "go ahead", "do it", "start implementing", or any first code edit while sitting on dev/main/master. Creates or resumes the branch that carries the work, before the edits land, so later commits and pull requests inherit it.
+description: Use when the user starts a unit of work, whether or not they name a work item: "work on #41243", "start work item 41243", "new branch for the rate limiting", "let's do 40581", and equally the moment an agreed plan turns into building — "lets get to it", "go ahead", "do it", "start implementing", or any first code edit while sitting on dev/main/master. Creates or resumes the branch that carries the work, before the edits land, so later commits and pull requests inherit it. Always start with a /grill-me after getting a good picture of what the work is about.
 ---
 
 # Work on
@@ -59,11 +59,11 @@ curl -s -u ":$PAT" "https://dev.azure.com/<org>/_apis/wit/workitems/<id>?api-ver
 
 Resolve the org and credential through the `azure-devops:work-item-connection` skill before that call. If the title cannot be read, branch as `feature/<id>` and carry on.
 
-## 4. Move the board
+## 4. Leave the board alone
 
-Hand the state change and assignment to the `azure-devops:work-items` skill: one step forward only, assigned to the signed-in user. It knows the process template's state names and the forward-only rule. Never set a terminal state.
+Read the work item for its title, description, repro steps and attachments, which is what it is for, and stop there. Do not change `System.State` and do not assign it. Hendrik runs the board himself: a merged task stays In Progress until staging verifies it, so the state says nothing about where the work is, and moving it produces confident nonsense.
 
-A failure here is worth one line of output, not a stop. The branch is the deliverable.
+Decide what is done from the repos (branches, merge commits) instead. Linking the work item to a PR at creation time is not a state change and stays fine.
 
 ## 5. One branch per repository
 
@@ -77,6 +77,6 @@ If `git remote get-url origin` does not point at `dev.azure.com` or `visualstudi
 
 ## Report
 
-The branch, what it was based on, and either the work-item title and its new state or a note that this repo has no work items.
+The branch, what it was based on, and either the work-item title or a note that this repo has no work items.
 
 When the repos are still carrying the last item's branches, `back-to-dev` resets them first.

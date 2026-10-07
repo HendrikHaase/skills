@@ -26,7 +26,7 @@ Stop and ask when it shows:
 
 - Untracked files nobody mentioned and this session did not create.
 - Modified tracked files this session did not touch. They are the user's work in progress, and `-A` sweeps them into your commit without either of you deciding to. Stage explicit paths instead.
-- Secret-shaped names: `.env*`, `*.pat`, `pat.txt`, `*key*`, `*.pem`, `id_rsa*`, `*.pfx`, `credentials*`, `*.publishsettings`, and local config overrides — `*.local.json`, `appsettings*.local.*`, `*.local.yml`, `settings.local.*`. The override pattern matches no obvious secret word, so nothing warns you before it reaches the remote.
+- Secret-shaped names: `.env*`, `*.pat`, `pat.txt`, `*key*`, `*.pem`, `id_rsa*`, `*.pfx`, `credentials*`, `*.publishsettings`, and local config overrides — `*.local.json`, `*.local.yml`, `settings.local.*`, and the environment-suffixed .NET form `appsettings.*.json` (`appsettings.Development.json` holds a live connection string in plenty of repos and carries no `.local` in its name). The override pattern matches no obvious secret word, so nothing warns you before it reaches the remote.
 - Binaries or anything over roughly 1 MB.
 
 A credential you find already committed in `HEAD` is a report, not an edit. Say where it is, add the untracked sibling to `.gitignore` so it stops being one `-A` away from the remote, and leave the tracked file alone: rewriting it in your commit neither rotates the credential nor removes it from history, and it buries a security finding inside an unrelated change.
@@ -47,6 +47,8 @@ git diff --ignore-cr-at-eol --numstat # content only; a file that vanishes here 
 Two consequences. Writing a file through a script (`open(p,"w")`, `sed -i`) rewrites every line ending on a CRLF-stored file, so a one-line edit becomes a whole-file diff — restore the committed version and re-apply byte-preserving when that happens. And when a genuine change lands in such a file, `git add --renormalize <file>` it and commit the normalization **alone** first: staged together, the normalization swallows the change and neither is reviewable.
 
 ### Whose change is it
+
+A failing check is owned the same way. On a branch that has just merged the default branch, a compile or test failure is as likely to have arrived with the merge as to be yours: blame the failing file (`git log <default> -1 -- <file>`) and check whether your branch touches it at all before you touch the code. A symbol missing from a generated or vendored library usually means the installed package lags the code that calls it, which is an install, not a bug. Report it and name whose it is; never fold someone else's breakage into your commit, and never let it block yours.
 
 In a repo that publishes a package, the version bump and lockfile entry that ship a change are **part of that change** — not the user's unrelated edit, even when the user ran the publish. "Pre-existing modification" is a claim to check against what is being committed, not a default for anything you did not type yourself. Leaving the bump behind records the code without recording which release carries it.
 

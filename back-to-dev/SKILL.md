@@ -37,6 +37,19 @@ Three refusals are deliberate, so read a note as a finding rather than a failure
 - No `branch -D`. An unmerged branch means the work is not where you think it is.
 - No stash, no `checkout --`, no clean. A dirty tree rides along on `switch`, and a `switch` that a dirty file blocks is reported, not forced.
 
+### When the user wants the refused ones gone anyway
+
+Doing it by hand is fine. Doing it to a lower standard than the script is not, and that is the easy mistake: the script's bar is "provably an ancestor of `origin/<default>`", and a hand-rolled check usually degrades to "a remote branch of that name exists", which proves nothing about the local tip.
+
+The user approves the **inventory you show them**, not the action. So the inventory has to be right before the question is asked, per branch and across every repo:
+
+```bash
+git rev-list --count origin/<default>..<branch>   # 0 => already on the default branch
+git rev-list --count origin/<branch>..<branch>    # 0 => the remote has this exact tip
+```
+
+A remote name that exists is not a remote copy of *this* tip. Anything that fails both counts still has commits living only on your disk, so either prove the content reached the default branch another way (a squash merge, a cherry-pick) and say which, or leave it alone and name it. Count stashes the same way, across all repos, before quoting a number. If a claim in the inventory turns out to be wrong after the user has approved it, say so plainly: they agreed to a fact, and the fact was yours.
+
 ## Read the report
 
 Columns: repo, branch, head, deleted, dirty_real, dirty_crlf, staged, untracked. Lines starting `!` need a decision.
@@ -44,6 +57,8 @@ Columns: repo, branch, head, deleted, dirty_real, dirty_crlf, staged, untracked.
 `dirty_real` and `dirty_crlf` are counted apart on purpose. "38 modified files" and "3 modified files plus 35 with only line-ending churn" lead to different decisions, and these repos on WSL produce a lot of churn.
 
 Relay the table, then name what needs a call: a branch that would not fast-forward, an unmerged branch left alone, a remote branch still on the server (its PR was not set to delete the source; offer, never delete someone's remote ref unasked).
+
+Offer the remote-branch cleanup once per session. An offer the user passes over is declined: on later runs, list the session's leftover remote branches in one line with no question. Read the script's full output before relaying it; never pipe its `!` lines away to make the report shorter.
 
 Close by asking for the next work item, or invoke `work-on` if the user already named one.
 
